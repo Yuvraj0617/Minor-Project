@@ -5,14 +5,13 @@ import jwt from "jsonwebtoken"
     try{
         const { name, email, password } = req.body;
 
-        // Check if user already exists
+        
         const userExists = await UserModel.findOne({ email });
         if(userExists){
             return res.status(400).json({ message: 'User already exists' });
         }
      
         const hashedPassword = await bcrypt.hash(password, 10);
-        console.log("Hashed Password: " ,hashedPassword);
         const newUser =  new UserModel({
             name: name,
             email: email,
@@ -20,9 +19,9 @@ import jwt from "jsonwebtoken"
         });
         await newUser.save();
 
-        console.log(newUser)
         const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
         res.session('token', token, { httpOnly: true, secure: true });
+        
         res.status(201).json({
             data: newUser,
             token: token,
@@ -42,19 +41,21 @@ import jwt from "jsonwebtoken"
 
         const user = await UserModel.findOne({ email });
         if (!user) {
-            return res.status(400).json({ message: 'Invalid email or password' });
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         const hashedPassword = user.password;
         const isValidPassword = await bcrypt.compare(password, hashedPassword);
 
         if (!isValidPassword) {
-            return res.status(400).json({ message: 'Invalid email or password' });
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
         res.status(200).json({
             message: "User logged in",
+            token: token,
+            data: user
         });
         
     } catch (error) {

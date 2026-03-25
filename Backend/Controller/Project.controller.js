@@ -1,7 +1,7 @@
 import Project from '../Model/Project.model.js';
 const CreateProject = async (req, res)=>{
     try {
-        const {title, description, technologies,TimeCondition} = req.body;
+        const {title, description, technologies,status,teamSize} = req.body;
         const userId=req.params.userId;
        
         const project = new Project({
@@ -9,7 +9,8 @@ const CreateProject = async (req, res)=>{
             title,
             description,
             technologies,
-            TimeCondition
+            status,
+            teamSize
         });
         await project.save();
         res.status(200).json({
@@ -20,7 +21,16 @@ const CreateProject = async (req, res)=>{
         res.status(500).json({ message: 'Server error in createProject' });
     }
 }
+ 
+const getProjects = async (req, res) => {
+  try {
+    const projects = await Project.find().populate("userId", "name");
+    res.json(projects);
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 
-
-export { CreateProject };
+export { CreateProject, getProjects };

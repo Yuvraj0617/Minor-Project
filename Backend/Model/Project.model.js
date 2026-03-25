@@ -1,15 +1,38 @@
 import mongoose from "mongoose";
- const post = new mongoose.Schema({
+const project = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     title: {
         type: String,
-        required: true  
+        required: true
     },
     description: {
         type: String,
-        required: true  
+        required: true
+    },
+    technologies: [{
+        type: String,
+        lowercase: true,
+        trim: true
+    }],
+    teamSize: {
+        type: Number,
+        default: 1
     },
 
-  });
+    status: {
+        type: [String],
+        required: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
 
 
- module.exports = mongoose.model('Project', project);
+const Project = mongoose.model('Project', project);
+export default Project;

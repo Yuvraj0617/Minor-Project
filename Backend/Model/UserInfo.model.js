@@ -18,10 +18,11 @@ const userInfoSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    Skills: {
-        type: [String],
-        required: false,
-    },
+   Skills: [{
+    type: String,
+    lowercase: true,
+    trim: true
+  }],
     Github: {
         type: String,
         required: false,

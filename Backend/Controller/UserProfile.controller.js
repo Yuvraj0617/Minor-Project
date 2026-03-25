@@ -19,7 +19,7 @@ const CreateUserProfile = async (req, res) => {
         });
         await newUserInfo.save();
         res.status(201).json({ 
-            message: 'User profile created'
+            message: 'User profile created',
          });
 
     } catch (error) {
