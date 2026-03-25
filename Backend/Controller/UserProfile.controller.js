@@ -2,7 +2,7 @@ import UserInfo from "../Model/UserInfo.model.js";
 
 const CreateUserProfile = async (req, res) => {
     try {
-        const { Institution, Bio, About, Skills, Github, LinkedIn } = req.body;
+        const { Institution, Bio, Role, Skills, Github, LinkedIn } = req.body;
         const userId =  req.params.userId;
       
         if (!userId) {
@@ -12,7 +12,7 @@ const CreateUserProfile = async (req, res) => {
             UserId: userId,
             Institution:Institution,
             Bio:Bio,
-            About:About,
+            Role:Role,
             Skills:Skills,
             Github:Github,
             LinkedIn:LinkedIn

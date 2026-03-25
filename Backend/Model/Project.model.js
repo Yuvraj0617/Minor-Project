@@ -23,10 +23,11 @@ const project = new mongoose.Schema({
         default: 1
     },
 
-    status: {
-        type: [String],
-        required: true
+    isurgent: {
+        type: Boolean,
+        default: false
     },
+    
     createdAt: {
         type: Date,
         default: Date.now

@@ -12,17 +12,24 @@ const userInfoSchema = new mongoose.Schema({
     },
     Bio: {
         type: String,
-        required: false, 
-    },
-    About: {
-        type: String,
         required: false,
     },
-   Skills: [{
-    type: String,
-    lowercase: true,
-    trim: true
-  }],
+    Role: {
+        type: [{
+            type: String,
+            lowercase: true,
+            trim: true
+        }]
+    },
+
+    Skills: {
+        type: [{
+            type: String,
+            lowercase: true,
+            trim: true
+        }]
+    }
+    ,
     Github: {
         type: String,
         required: false,

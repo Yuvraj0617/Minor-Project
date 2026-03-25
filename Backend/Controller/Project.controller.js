@@ -1,7 +1,7 @@
 import Project from '../Model/Project.model.js';
 const CreateProject = async (req, res)=>{
     try {
-        const {title, description, technologies,status,teamSize} = req.body;
+        const {title, description, technologies,isurgent,teamSize} = req.body;
         const userId=req.params.userId;
        
         const project = new Project({
@@ -9,7 +9,7 @@ const CreateProject = async (req, res)=>{
             title,
             description,
             technologies,
-            status,
+            isurgent,
             teamSize
         });
         await project.save();
