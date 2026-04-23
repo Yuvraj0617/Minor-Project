@@ -28,7 +28,7 @@ const sanitizeUser = (user) => ({
         await newUser.save();
 
         const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-
+    
         res.status(201).json({
             data: sanitizeUser(newUser),
             token: token,

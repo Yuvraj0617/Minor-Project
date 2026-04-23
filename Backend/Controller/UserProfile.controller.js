@@ -37,7 +37,7 @@ const CreateUserProfile = async (req, res) => {
         res.status(500).json({ message: 'Server error in createUserProfile' });
      }
     
-};
+};   
 
 const GetUserProfile = async (req, res) => {
     try {

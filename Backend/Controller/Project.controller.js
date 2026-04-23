@@ -5,7 +5,7 @@ import User from "../Model/User.model.js";
 const normalizeValues = (values = []) => {
     if (!Array.isArray(values)) {
         values = [values];
-    }
+    }   
 
     return [...new Set(
         values

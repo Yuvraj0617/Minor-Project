@@ -20,7 +20,7 @@ const userInfoSchema = new mongoose.Schema({
             lowercase: true,
             trim: true
         }]
-    },
+    },   
 
     Skills: {
         type: [{
