@@ -9,10 +9,19 @@ const project = new mongoose.Schema({
         type: String,
         required: true
     },
+    type:{
+        type: [String],
+        required: true
+    },
     description: {
         type: String,
         required: true
     },
+    requiredSkills: [{
+        type: String,
+        lowercase: true,
+        trim: true
+    }],
     technologies: [{
         type: String,
         lowercase: true,
@@ -22,7 +31,6 @@ const project = new mongoose.Schema({
         type: Number,
         default: 1
     },
-
     isurgent: {
         type: Boolean,
         default: false

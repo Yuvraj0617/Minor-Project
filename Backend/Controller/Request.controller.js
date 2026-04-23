@@ -7,9 +7,18 @@ import Notification from "../Model/Notification.model.js";
 export const getApplicants = async (req, res) => {
   try {
     const { projectId } = req.params;
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    if (project.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not allowed to view applicants" });
+    }
 
     const applicants = await Application.find({ projectId })
-      .populate("applicantId", "name email");
+      .populate("userId", "name email");
 
     res.json(applicants);
 
@@ -26,12 +35,32 @@ export const acceptApplication = async (req, res) => {
     if (!application)
       return res.status(404).json({ message: "Not found" });
 
+    const project = await Project.findById(application.projectId);
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    if (project.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not allowed to accept this application" });
+    }
+
     application.status = "accepted";
     await application.save();
 
-    // Notify applicant
+    const existingTeamMember = await Team.findOne({
+      projectId: application.projectId,
+      userId: application.userId
+    });
+
+    if (!existingTeamMember) {
+      await Team.create({
+        projectId: application.projectId,
+        userId: application.userId
+      });
+    }
+
     await Notification.create({
-      userId: application.applicantId,
+      userId: application.userId,
       type: "acceptance",
       referenceId: application.projectId
     });
@@ -49,9 +78,27 @@ export const rejectApplication = async (req, res) => {
     const { id } = req.params;
 
     const application = await Application.findById(id);
+    if (!application) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    const project = await Project.findById(application.projectId);
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    if (project.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not allowed to reject this application" });
+    }
 
     application.status = "rejected";
     await application.save();
+
+    await Notification.create({
+      userId: application.userId,
+      type: "rejection",
+      referenceId: application.projectId
+    });
 
     res.json({ message: "Rejected" });
 

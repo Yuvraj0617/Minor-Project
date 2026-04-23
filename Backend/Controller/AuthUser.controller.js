@@ -1,6 +1,14 @@
 import UserModel from "../Model/User.model.js";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+
+const sanitizeUser = (user) => ({
+    _id: user._id,
+    name: user.name,
+    email: user.email,
+    createdAt: user.createdAt
+});
+
  const CreateUser = async (req, res) => {
     try{
         const { name, email, password } = req.body;
@@ -20,10 +28,9 @@ import jwt from "jsonwebtoken"
         await newUser.save();
 
         const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-        res.session('token', token, { httpOnly: true, secure: true });
-        
+
         res.status(201).json({
-            data: newUser,
+            data: sanitizeUser(newUser),
             token: token,
             message: "User created"
         })
@@ -55,7 +62,7 @@ import jwt from "jsonwebtoken"
         res.status(200).json({
             message: "User logged in",
             token: token,
-            data: user
+            data: sanitizeUser(user)
         });
         
     } catch (error) {

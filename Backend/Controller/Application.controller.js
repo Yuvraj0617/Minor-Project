@@ -12,13 +12,13 @@ export const expressInterest = async (req, res) => {
       return res.status(404).json({ message: "Project not found" });
 
     
-    if (project.userId.toString() === req.user.id)
+    if (project.userId.toString() === req.user._id.toString())
       return res.status(400).json({ message: "Cannot apply to own project" });
 
     
     const exists = await Application.findOne({
       projectId,
-      applicantId: req.user.id
+      userId: req.user._id
     });
 
     if (exists)
@@ -27,14 +27,13 @@ export const expressInterest = async (req, res) => {
     
     const application = await Application.create({
       projectId,
-      applicantId: req.user.id
+      userId: req.user._id
     });
 
     
     await Notification.create({
       userId: project.userId,
-      senderId: req.user.id,
-      type: "interest",
+      type: "application",
       referenceId: projectId
     });
 
