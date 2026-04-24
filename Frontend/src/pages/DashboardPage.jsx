@@ -270,7 +270,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-slate-950 px-4 py-10 text-slate-50">
+      <main className="min-h-dvh bg-slate-950 px-4 py-8 text-slate-50 sm:py-10">
         <div className="mx-auto max-w-6xl animate-pulse rounded-[2rem] border border-white/10 bg-white/5 p-8">
           Loading your workspace...
         </div>
@@ -279,30 +279,30 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(251,146,60,0.18),_transparent_25%),radial-gradient(circle_at_top_right,_rgba(59,130,246,0.22),_transparent_26%),linear-gradient(180deg,_#08111f_0%,_#0f172a_48%,_#111827_100%)] px-4 py-6 text-slate-100 md:px-8">
+    <main className="min-h-dvh bg-[radial-gradient(circle_at_top_left,_rgba(251,146,60,0.18),_transparent_25%),radial-gradient(circle_at_top_right,_rgba(59,130,246,0.22),_transparent_26%),linear-gradient(180deg,_#08111f_0%,_#0f172a_48%,_#111827_100%)] px-3 py-4 text-slate-100 sm:px-4 sm:py-6 md:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <header className="rounded-[2rem] border border-white/10 bg-white/6 p-6 shadow-2xl backdrop-blur">
+        <header className="rounded-[1.5rem] border border-white/10 bg-white/6 p-4 shadow-2xl backdrop-blur sm:rounded-[2rem] sm:p-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300">Collab Workspace</p>
-              <h1 className="mt-2 text-3xl font-bold text-white md:text-4xl">{user?.name || 'Builder'} Dashboard</h1>
+              <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl md:text-4xl">{user?.name || 'Builder'} Dashboard</h1>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
                 This frontend is connected to your backend workflow: profile setup, skill-based matching, project posting,
                 applications, applicants, and notifications.
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <NotificationBadge count={notifications.length} />
               <button
-                className="rounded-full border border-white/15 bg-white/8 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/14"
+                className="w-full rounded-full border border-white/15 bg-white/8 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/14 sm:w-auto"
                 onClick={() => navigate('/user-profile')}
                 type="button"
               >
                 Profile View
               </button>
               <button
-                className="rounded-full bg-linear-to-r from-orange-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5"
+                className="w-full rounded-full bg-linear-to-r from-orange-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 sm:w-auto"
                 onClick={() => {
                   logout()
                   navigate('/login')
@@ -319,13 +319,13 @@ export default function DashboardPage() {
         </header>
 
         <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-          <article className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
-            <div className="flex items-center justify-between gap-3">
+          <article className="rounded-[1.5rem] border border-white/10 bg-white/6 p-4 backdrop-blur sm:rounded-[1.75rem] sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300">Your Profile</p>
-                <h2 className="mt-2 text-2xl font-semibold text-white">Skills drive your project matches</h2>
+                <h2 className="mt-2 text-xl font-semibold text-white sm:text-2xl">Skills drive your project matches</h2>
               </div>
-              <div className="rounded-2xl bg-emerald-400/10 px-4 py-3 text-right">
+              <div className="self-start rounded-2xl bg-emerald-400/10 px-4 py-3 text-left sm:text-right">
                 <p className="text-xs uppercase tracking-[0.2em] text-emerald-200">Current matchable skills</p>
                 <p className="mt-1 text-2xl font-bold text-emerald-100">{profile?.Skills?.length || 0}</p>
               </div>
@@ -377,9 +377,9 @@ export default function DashboardPage() {
             </form>
           </article>
 
-          <article className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
+          <article className="rounded-[1.5rem] border border-white/10 bg-white/6 p-4 backdrop-blur sm:rounded-[1.75rem] sm:p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-orange-300">Notifications</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Recent activity</h2>
+            <h2 className="mt-2 text-xl font-semibold text-white sm:text-2xl">Recent activity</h2>
             <div className="mt-5 grid gap-3">
               {notifications.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-white/10 bg-slate-950/35 p-4 text-sm text-slate-300">
@@ -401,9 +401,9 @@ export default function DashboardPage() {
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1fr_1.1fr]">
-          <article className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
+          <article className="rounded-[1.5rem] border border-white/10 bg-white/6 p-4 backdrop-blur sm:rounded-[1.75rem] sm:p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">Post Project</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Create a project that can be matched</h2>
+            <h2 className="mt-2 text-xl font-semibold text-white sm:text-2xl">Create a project that can be matched</h2>
 
             <form className="mt-5 grid gap-3" onSubmit={handleProjectSubmit}>
               <input
@@ -463,14 +463,14 @@ export default function DashboardPage() {
             </form>
           </article>
 
-          <article className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
+          <article className="rounded-[1.5rem] border border-white/10 bg-white/6 p-4 backdrop-blur sm:rounded-[1.75rem] sm:p-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300">Project Feed</p>
-                <h2 className="mt-2 text-2xl font-semibold text-white">Browse and filter projects</h2>
+                <h2 className="mt-2 text-xl font-semibold text-white sm:text-2xl">Browse and filter projects</h2>
               </div>
 
-              <form className="grid gap-3 md:grid-cols-3" onSubmit={handleFilterSubmit}>
+              <form className="grid w-full gap-3 md:grid-cols-3 xl:max-w-3xl" onSubmit={handleFilterSubmit}>
                 <input
                   className="rounded-2xl border border-white/10 bg-slate-950/40 px-4 py-3 text-sm outline-none ring-cyan-400/40 transition focus:ring"
                   placeholder="Filter by skill"
@@ -515,7 +515,7 @@ export default function DashboardPage() {
                         <p className="mt-2 text-sm leading-6 text-slate-300">{project.description}</p>
                       </div>
 
-                      <div className="rounded-2xl bg-white/8 px-4 py-3 text-sm text-slate-200">
+                      <div className="self-start rounded-2xl bg-white/8 px-4 py-3 text-sm text-slate-200">
                         Team size: {project.teamSize}
                       </div>
                     </div>
@@ -600,7 +600,7 @@ export default function DashboardPage() {
                       <div className="mt-4 grid gap-3">
                         {candidateMatchesByProject[project._id].map((candidate) => (
                           <div key={candidate.user._id} className="rounded-2xl border border-white/10 bg-white/6 p-4">
-                            <div className="flex items-center justify-between gap-3">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                               <div>
                                 <p className="text-sm font-semibold text-white">{candidate.user.name}</p>
                                 <p className="text-xs text-slate-300">{candidate.user.email}</p>
@@ -624,9 +624,9 @@ export default function DashboardPage() {
         </section>
 
         <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-          <article className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
+          <article className="rounded-[1.5rem] border border-white/10 bg-white/6 p-4 backdrop-blur sm:rounded-[1.75rem] sm:p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-300">Matched Projects</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Projects ranked for your skill profile</h2>
+            <h2 className="mt-2 text-xl font-semibold text-white sm:text-2xl">Projects ranked for your skill profile</h2>
             <div className="mt-5 grid gap-4">
               {matches.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-white/10 bg-slate-950/35 p-4 text-sm text-slate-300">
@@ -635,12 +635,12 @@ export default function DashboardPage() {
               ) : (
                 matches.map((project) => (
                   <div key={project._id} className="rounded-[1.4rem] border border-white/10 bg-slate-950/35 p-5">
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{project.userId?.name || 'Unknown owner'}</p>
                         <h3 className="mt-2 text-xl font-semibold text-white">{project.title}</h3>
                       </div>
-                      <div className="rounded-2xl bg-emerald-500/15 px-4 py-3 text-right">
+                      <div className="self-start rounded-2xl bg-emerald-500/15 px-4 py-3 text-left sm:text-right">
                         <p className="text-xs uppercase tracking-[0.18em] text-emerald-200">Match</p>
                         <p className="mt-1 text-2xl font-bold text-emerald-100">{project.matchPercentage}%</p>
                       </div>
@@ -655,9 +655,9 @@ export default function DashboardPage() {
             </div>
           </article>
 
-          <article className="rounded-[1.75rem] border border-white/10 bg-white/6 p-6 backdrop-blur">
+          <article className="rounded-[1.5rem] border border-white/10 bg-white/6 p-4 backdrop-blur sm:rounded-[1.75rem] sm:p-6">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-violet-300">My Projects</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Projects you own</h2>
+            <h2 className="mt-2 text-xl font-semibold text-white sm:text-2xl">Projects you own</h2>
             <div className="mt-5 grid gap-4">
               {myProjects.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-white/10 bg-slate-950/35 p-4 text-sm text-slate-300">

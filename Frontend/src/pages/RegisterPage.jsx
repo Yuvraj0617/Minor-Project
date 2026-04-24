@@ -1,18 +1,17 @@
-import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import { registerUser } from '../services/authApi'
 import { useAuth } from '../context/useAuth'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
-  const [serverError, setServerError] = useState('')
   const { login } = useAuth()
 
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm({
     defaultValues: {
@@ -23,11 +22,9 @@ export default function RegisterPage() {
     },
   })
 
-  const passwordValue = watch('password')
+  const passwordValue = useWatch({ control, name: 'password' })
 
   const onSubmit = async (values) => {
-    setServerError('')
-
     try {
       const response = await registerUser({
         name: values.name,
@@ -37,113 +34,131 @@ export default function RegisterPage() {
 
       if (response.token) {
         login(response)
+        toast.success(response?.message || 'Account created successfully.')
         navigate('/userinfo')
         return
       }
 
+      toast.success(response?.message || 'Account created. Please sign in.')
       navigate('/login')
     } catch (error) {
-      setServerError(error.message)
+      toast.error(error?.message || 'Unable to register. Please try again.')
     }
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 md:p-8">
-      <div className="mx-auto flex min-h-[90vh] w-full max-w-6xl items-center justify-center rounded-3xl bg-linear-to-br from-rose-100 via-sky-100 to-lime-100 p-4 md:p-8">
-        <section className="w-full max-w-md rounded-2xl border border-white/80 bg-white/85 p-7 shadow-2xl backdrop-blur">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">Minor Project</p>
-          <h1 className="mt-2 text-3xl font-bold text-slate-800">Create your account</h1>
-          <p className="mt-1 text-sm text-slate-600">Start collaborating with your team in minutes.</p>
+    <main className="auth-layout app-page">
+      <section className="auth-card">
+        <aside className="auth-brand-panel">
+          <div>
+            <span className="brand-tag">
+              <span className="brand-mark">C</span>
+              CraftBridge
+            </span>
+            <h1 className="brand-headline">Create your creator profile in under two minutes.</h1>
+            <p className="brand-copy">
+              Build trust with teammates using profile clarity, role intent, and skill visibility from day one.
+            </p>
+          </div>
 
-          <form className="mt-5 grid gap-2" onSubmit={handleSubmit(onSubmit)}>
-            <label className="mt-1 text-sm font-semibold text-slate-700" htmlFor="name">
-            Full name
-          </label>
-          <input
-            id="name"
-            type="text"
-            placeholder="John Doe"
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none ring-sky-300 transition focus:ring"
-            {...register('name', {
-              required: 'Name is required',
-              minLength: {
-                value: 2,
-                message: 'Name must be at least 2 characters',
-              },
-            })}
-          />
-            {errors.name ? <p className="text-sm text-rose-600">{errors.name.message}</p> : null}
+          <ul className="brand-list">
+            <li>Post projects and recruit contributors quickly.</li>
+            <li>Receive recommendation-based matches automatically.</li>
+            <li>Grow a professional collaboration portfolio over time.</li>
+          </ul>
+        </aside>
 
-            <label className="mt-1 text-sm font-semibold text-slate-700" htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none ring-sky-300 transition focus:ring"
-            {...register('email', {
-              required: 'Email is required',
-              pattern: {
-                value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                message: 'Please enter a valid email address',
-              },
-            })}
-          />
-            {errors.email ? <p className="text-sm text-rose-600">{errors.email.message}</p> : null}
+        <section className="auth-form-panel">
+          <div>
+            <p className="kicker">Get Started</p>
+            <h2 className="page-title">Create your CraftBridge account</h2>
+            <p className="page-subtitle">Sign up, complete your profile, and start finding your ideal team partner.</p>
+          </div>
 
-            <label className="mt-1 text-sm font-semibold text-slate-700" htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            placeholder="Create a password"
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none ring-sky-300 transition focus:ring"
-            {...register('password', {
-              required: 'Password is required',
-              minLength: {
-                value: 6,
-                message: 'Password must be at least 6 characters',
-              },
-            })}
-          />
-            {errors.password ? <p className="text-sm text-rose-600">{errors.password.message}</p> : null}
+          <form className="field-grid" onSubmit={handleSubmit(onSubmit)}>
+            <div className="field-group">
+              <label className="field-label" htmlFor="name">Full name</label>
+              <input
+                id="name"
+                type="text"
+                placeholder="John Doe"
+                className="field-input"
+                {...register('name', {
+                  required: 'Name is required',
+                  minLength: {
+                    value: 2,
+                    message: 'Name must be at least 2 characters',
+                  },
+                })}
+              />
+              {errors.name ? <p className="helper-error">{errors.name.message}</p> : null}
+            </div>
 
-            <label className="mt-1 text-sm font-semibold text-slate-700" htmlFor="confirmPassword">
-            Confirm password
-          </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            placeholder="Re-enter password"
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none ring-sky-300 transition focus:ring"
-            {...register('confirmPassword', {
-              required: 'Please confirm your password',
-              validate: (value) => value === passwordValue || 'Passwords do not match',
-            })}
-          />
-            {errors.confirmPassword ? <p className="text-sm text-rose-600">{errors.confirmPassword.message}</p> : null}
+            <div className="field-group">
+              <label className="field-label" htmlFor="email">Email</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                className="field-input"
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: 'Please enter a valid email address',
+                  },
+                })}
+              />
+              {errors.email ? <p className="helper-error">{errors.email.message}</p> : null}
+            </div>
 
-            {serverError ? <p className="text-sm text-rose-600">{serverError}</p> : null}
+            <div className="field-grid two">
+              <div className="field-group">
+                <label className="field-label" htmlFor="password">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Create a password"
+                  className="field-input"
+                  {...register('password', {
+                    required: 'Password is required',
+                    minLength: {
+                      value: 6,
+                      message: 'Password must be at least 6 characters',
+                    },
+                  })}
+                />
+                {errors.password ? <p className="helper-error">{errors.password.message}</p> : null}
+              </div>
 
-            <button
-              className="mt-3 rounded-xl bg-linear-to-r from-rose-500 via-amber-500 to-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
-              type="submit"
-              disabled={isSubmitting}
-            >
-            {isSubmitting ? 'Creating account...' : 'Register'}
-          </button>
-        </form>
+              <div className="field-group">
+                <label className="field-label" htmlFor="confirmPassword">Confirm password</label>
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Re-enter password"
+                  className="field-input"
+                  {...register('confirmPassword', {
+                    required: 'Please confirm your password',
+                    validate: (value) => value === passwordValue || 'Passwords do not match',
+                  })}
+                />
+                {errors.confirmPassword ? <p className="helper-error">{errors.confirmPassword.message}</p> : null}
+              </div>
+            </div>
+            <button className="btn-primary" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating account...' : 'Register'}
+            </button>
+          </form>
 
-          <p className="mt-4 text-sm text-slate-600">
+          <p className="page-subtitle">
             Already have an account?{' '}
-            <Link to="/login" className="font-semibold text-sky-700 hover:underline">
+            <Link to="/login" className="text-cyan-300 hover:text-cyan-200">
               Sign in
             </Link>
           </p>
         </section>
-      </div>
+      </section>
     </main>
   )
 }

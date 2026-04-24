@@ -1,6 +1,6 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 import { createUserInfo } from '../services/authApi'
 import { useAuth } from '../context/useAuth'
 
@@ -17,7 +17,6 @@ function splitByComma(value) {
 
 export default function UserInfoPage() {
   const navigate = useNavigate()
-  const [serverError, setServerError] = useState('')
   const { token, user, saveProfileInfo } = useAuth()
 
   const {
@@ -36,10 +35,8 @@ export default function UserInfoPage() {
   })
 
   const onSubmit = async (values) => {
-    setServerError('')
-
     if (!user?._id) {
-      setServerError('User not found. Please login again.')
+      toast.error('User not found. Please login again.')
       return
     }
 
@@ -55,101 +52,120 @@ export default function UserInfoPage() {
     try {
       const response = await createUserInfo(payload, token)
       saveProfileInfo(response.data || payload)
+      toast.success(response?.message || 'Profile info saved successfully.')
       navigate('/app')
     } catch (error) {
-      setServerError(error.message)
+      toast.error(error?.message || 'Unable to save profile info.')
     }
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 md:p-8">
-      <div className="mx-auto flex min-h-[90vh] w-full max-w-6xl items-center justify-center rounded-3xl bg-linear-to-br from-amber-100 via-cyan-100 to-emerald-100 p-4 md:p-8">
-        <section className="w-full max-w-2xl rounded-2xl border border-white/80 bg-white/85 p-7 shadow-2xl backdrop-blur">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">Complete Your Profile</p>
-          <h1 className="mt-2 text-3xl font-bold text-slate-800">User Info Form</h1>
-          <p className="mt-1 text-sm text-slate-600">Add your details to continue to your profile.</p>
+    <main className="auth-layout app-page">
+      <section className="auth-card">
+        <aside className="auth-brand-panel">
+          <div>
+            <span className="brand-tag">
+              <span className="brand-mark">C</span>
+              CraftBridge Onboarding
+            </span>
+            <h1 className="brand-headline">Tell teammates who you are and what you can build.</h1>
+            <p className="brand-copy">
+              Rich creator profiles improve matching quality and make project recruitment faster.
+            </p>
+          </div>
 
-          <form className="mt-5 grid gap-2" onSubmit={handleSubmit(onSubmit)}>
-            <label className="mt-1 text-sm font-semibold text-slate-700" htmlFor="Institution">
-            Institution
-          </label>
-          <input
-            id="Institution"
-            type="text"
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none ring-sky-300 transition focus:ring"
-            placeholder="Your college or company"
-            {...register('Institution', {
-              required: 'Institution is required',
-            })}
-          />
-            {errors.Institution ? <p className="text-sm text-rose-600">{errors.Institution.message}</p> : null}
+          <ul className="brand-list">
+            <li>Clear role and skill tags increase match precision.</li>
+            <li>Portfolio links help teammates verify fit quickly.</li>
+            <li>A complete profile improves acceptance rates.</li>
+          </ul>
+        </aside>
 
-            <label className="mt-1 text-sm font-semibold text-slate-700" htmlFor="Bio">
-            Bio
-          </label>
-          <textarea
-            id="Bio"
-            className="min-h-28 w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none ring-sky-300 transition focus:ring"
-            placeholder="Tell us a little about yourself"
-            {...register('Bio')}
-          />
+        <section className="auth-form-panel">
+          <div>
+            <p className="kicker">Profile Setup</p>
+            <h2 className="page-title">Complete your creator profile</h2>
+            <p className="page-subtitle">Add your details once, then CraftBridge can recommend relevant projects and partners.</p>
+          </div>
 
-            <label className="mt-1 text-sm font-semibold text-slate-700" htmlFor="Role">
-            Roles
-          </label>
-          <input
-            id="Role"
-            type="text"
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none ring-sky-300 transition focus:ring"
-            placeholder="frontend developer, ui designer"
-            {...register('Role')}
-          />
+          <form className="field-grid" onSubmit={handleSubmit(onSubmit)}>
+            <div className="field-group">
+              <label className="field-label" htmlFor="Institution">Institution</label>
+              <input
+                id="Institution"
+                type="text"
+                className="field-input"
+                placeholder="Your college or company"
+                {...register('Institution', {
+                  required: 'Institution is required',
+                })}
+              />
+              {errors.Institution ? <p className="helper-error">{errors.Institution.message}</p> : null}
+            </div>
 
-            <label className="mt-1 text-sm font-semibold text-slate-700" htmlFor="Skills">
-            Skills
-          </label>
-          <input
-            id="Skills"
-            type="text"
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none ring-sky-300 transition focus:ring"
-            placeholder="react, node, mongodb"
-            {...register('Skills')}
-          />
+            <div className="field-group">
+              <label className="field-label" htmlFor="Bio">Bio</label>
+              <textarea
+                id="Bio"
+                className="field-input field-textarea"
+                placeholder="Tell collaborators about your strengths and interests"
+                {...register('Bio')}
+              />
+            </div>
 
-            <label className="mt-1 text-sm font-semibold text-slate-700" htmlFor="Github">
-            Github URL
-          </label>
-          <input
-            id="Github"
-            type="url"
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none ring-sky-300 transition focus:ring"
-            placeholder="https://github.com/username"
-            {...register('Github')}
-          />
+            <div className="field-grid two">
+              <div className="field-group">
+                <label className="field-label" htmlFor="Role">Roles</label>
+                <input
+                  id="Role"
+                  type="text"
+                  className="field-input"
+                  placeholder="frontend developer, ui designer"
+                  {...register('Role')}
+                />
+              </div>
 
-            <label className="mt-1 text-sm font-semibold text-slate-700" htmlFor="LinkedIn">
-            LinkedIn URL
-          </label>
-          <input
-            id="LinkedIn"
-            type="url"
-            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none ring-sky-300 transition focus:ring"
-            placeholder="https://linkedin.com/in/username"
-            {...register('LinkedIn')}
-          />
+              <div className="field-group">
+                <label className="field-label" htmlFor="Skills">Skills</label>
+                <input
+                  id="Skills"
+                  type="text"
+                  className="field-input"
+                  placeholder="react, node, mongodb"
+                  {...register('Skills')}
+                />
+              </div>
+            </div>
 
-            {serverError ? <p className="text-sm text-rose-600">{serverError}</p> : null}
+            <div className="field-grid two">
+              <div className="field-group">
+                <label className="field-label" htmlFor="Github">Github URL</label>
+                <input
+                  id="Github"
+                  type="url"
+                  className="field-input"
+                  placeholder="https://github.com/username"
+                  {...register('Github')}
+                />
+              </div>
 
-            <button
-              className="mt-3 rounded-xl bg-linear-to-r from-amber-500 via-orange-500 to-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
-              type="submit"
-              disabled={isSubmitting}
-            >
-            {isSubmitting ? 'Saving info...' : 'Continue to Profile'}
-          </button>
-        </form>
+              <div className="field-group">
+                <label className="field-label" htmlFor="LinkedIn">LinkedIn URL</label>
+                <input
+                  id="LinkedIn"
+                  type="url"
+                  className="field-input"
+                  placeholder="https://linkedin.com/in/username"
+                  {...register('LinkedIn')}
+                />
+              </div>
+            </div>
+            <button className="btn-primary" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving info...' : 'Continue to dashboard'}
+            </button>
+          </form>
         </section>
-      </div>
+      </section>
     </main>
   )
 }

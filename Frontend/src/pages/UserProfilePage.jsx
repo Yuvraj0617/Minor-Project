@@ -45,53 +45,49 @@ export default function UserProfilePage() {
   }, [currentUser?._id, saveProfileInfo, token])
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 md:p-8">
-      <div className="mx-auto flex min-h-[90vh] w-full max-w-6xl items-center justify-center rounded-3xl bg-linear-to-br from-sky-100 via-emerald-100 to-lime-100 p-4 md:p-8">
-        <section className="w-full max-w-3xl rounded-2xl border border-white/80 bg-white/85 p-7 shadow-2xl backdrop-blur">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">User Profile</p>
-          <h1 className="mt-2 text-3xl font-bold text-slate-800">{currentUser?.name || 'User'}</h1>
-          <p className="mt-1 text-sm text-slate-600">Signed in as {currentUser?.email || 'N/A'}</p>
+    <main className="app-page">
+      <div className="mx-auto w-full max-w-5xl p-4 sm:p-6">
+        <section className="shell-panel">
+          <p className="kicker">Public Creator Profile</p>
+          <h1 className="page-title mt-2">{currentUser?.name || 'User'}</h1>
+          <p className="page-subtitle">{currentUser?.email || 'N/A'}</p>
 
-          {loading ? <p className="mt-4 text-sm font-semibold text-sky-700">Loading profile info...</p> : null}
-          {fetchError ? <p className="mt-2 text-sm text-rose-600">{fetchError}</p> : null}
+          {loading ? <p className="helper-ok mt-4">Loading profile info...</p> : null}
+          {fetchError ? <p className="helper-error mt-4">{fetchError}</p> : null}
 
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <div className="rounded-xl border border-sky-100 bg-sky-50 p-3">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-700">Institution</span>
-              <p className="mt-1 text-sm font-semibold text-slate-800">{profileInfo?.Institution || 'N/A'}</p>
-            </div>
-            <div className="rounded-xl border border-sky-100 bg-sky-50 p-3">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-700">Bio</span>
-              <p className="mt-1 text-sm font-semibold text-slate-800">{profileInfo?.Bio || 'N/A'}</p>
-            </div>
-            <div className="rounded-xl border border-sky-100 bg-sky-50 p-3">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-700">Role</span>
-              <p className="mt-1 text-sm font-semibold text-slate-800">{renderList(profileInfo?.Role)}</p>
-            </div>
-            <div className="rounded-xl border border-sky-100 bg-sky-50 p-3">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-700">Skills</span>
-              <p className="mt-1 text-sm font-semibold text-slate-800">{renderList(profileInfo?.Skills)}</p>
-            </div>
-            <div className="rounded-xl border border-sky-100 bg-sky-50 p-3">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-700">Github</span>
-              <p className="mt-1 break-all text-sm font-semibold text-slate-800">{profileInfo?.Github || 'N/A'}</p>
-            </div>
-            <div className="rounded-xl border border-sky-100 bg-sky-50 p-3">
-              <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-sky-700">LinkedIn</span>
-              <p className="mt-1 break-all text-sm font-semibold text-slate-800">{profileInfo?.LinkedIn || 'N/A'}</p>
-            </div>
+          <div className="section-grid two mt-5 staggered">
+            <article className="shell-panel">
+              <p className="kicker">Institution</p>
+              <p className="mt-2 text-sm text-slate-100">{profileInfo?.Institution || 'N/A'}</p>
+            </article>
+            <article className="shell-panel">
+              <p className="kicker">Bio</p>
+              <p className="mt-2 text-sm text-slate-100">{profileInfo?.Bio || 'N/A'}</p>
+            </article>
+            <article className="shell-panel">
+              <p className="kicker">Role</p>
+              <p className="mt-2 text-sm text-slate-100">{renderList(profileInfo?.Role)}</p>
+            </article>
+            <article className="shell-panel">
+              <p className="kicker">Skills</p>
+              <p className="mt-2 text-sm text-slate-100">{renderList(profileInfo?.Skills)}</p>
+            </article>
+            <article className="shell-panel">
+              <p className="kicker">Github</p>
+              <p className="mt-2 break-all text-sm text-slate-100">{profileInfo?.Github || 'N/A'}</p>
+            </article>
+            <article className="shell-panel">
+              <p className="kicker">LinkedIn</p>
+              <p className="mt-2 break-all text-sm text-slate-100">{profileInfo?.LinkedIn || 'N/A'}</p>
+            </article>
           </div>
 
-          <div className="mt-5 grid gap-3 md:grid-cols-2">
-            <button
-              className="rounded-xl bg-linear-to-r from-emerald-500 to-sky-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
-              onClick={() => navigate('/app')}
-              type="button"
-            >
+          <div className="section-grid two mt-5">
+            <button className="btn-primary" onClick={() => navigate('/app')} type="button">
               Open Dashboard
             </button>
             <button
-              className="rounded-xl bg-linear-to-r from-slate-600 to-slate-800 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5"
+              className="btn-danger"
               onClick={() => {
                 logout()
                 navigate('/login')

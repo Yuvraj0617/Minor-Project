@@ -67,6 +67,82 @@ const CreateProject = async (req, res)=>{
         res.status(500).json({ message: 'Server error in createProject' });
     }
 }
+
+const UpdateProject = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const existingProject = await Project.findById(projectId);
+
+    if (!existingProject) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    if (existingProject.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not allowed to update this project' });
+    }
+
+    const {
+      title,
+      type,
+      description,
+      requiredSkills,
+      technologies,
+      isurgent,
+      teamSize,
+    } = req.body;
+
+    const updates = {
+      title,
+      type,
+      description,
+      requiredSkills,
+      technologies,
+      isurgent,
+      teamSize,
+    };
+
+    Object.keys(updates).forEach((key) => {
+      if (updates[key] === undefined) {
+        delete updates[key];
+      }
+    });
+
+    const updatedProject = await Project.findByIdAndUpdate(projectId, updates, {
+      new: true,
+      runValidators: true,
+    }).populate('userId', 'name email');
+
+    res.status(200).json({
+      message: 'Project updated successfully',
+      data: updatedProject,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error in updateProject' });
+  }
+};
+
+const DeleteProject = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const project = await Project.findById(projectId);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    if (project.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Not allowed to delete this project' });
+    }
+
+    await project.deleteOne();
+
+    res.status(200).json({ message: 'Project deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error in deleteProject' });
+  }
+};
  
 const getProjects = async (req, res) => {
   try {
@@ -196,4 +272,11 @@ const getMatchedUsersForProject = async (req, res) => {
   }
 };
 
-export { CreateProject, getProjects, getMatchedProjects, getMatchedUsersForProject };
+export {
+  CreateProject,
+  UpdateProject,
+  DeleteProject,
+  getProjects,
+  getMatchedProjects,
+  getMatchedUsersForProject,
+};

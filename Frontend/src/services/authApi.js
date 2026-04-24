@@ -109,6 +109,27 @@ export async function createProject(values, token) {
   return parseApiResponse(response)
 }
 
+export async function updateProject(projectId, values, token) {
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}`, {
+    method: 'PATCH',
+    headers: jsonHeaders(token),
+    body: JSON.stringify(values),
+  })
+
+  return parseApiResponse(response)
+}
+
+export async function deleteProject(projectId, token) {
+  const response = await fetch(`${API_BASE_URL}/api/projects/${projectId}`, {
+    method: 'DELETE',
+    headers: {
+      ...authHeaders(token),
+    },
+  })
+
+  return parseApiResponse(response)
+}
+
 export async function getMatchedProjects(token) {
   const response = await fetch(`${API_BASE_URL}/api/projects/matches/me`, {
     headers: {

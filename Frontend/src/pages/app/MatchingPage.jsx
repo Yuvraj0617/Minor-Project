@@ -23,36 +23,56 @@ export default function MatchingPage() {
   }, [token])
 
   return (
-    <section className="rounded-[2rem] border border-white/10 bg-white/6 p-6 shadow-2xl backdrop-blur">
-      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-300">Matching</p>
-      <h2 className="mt-3 text-3xl font-bold text-white">Skill-based recommendations</h2>
-      <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">This section demonstrates team formation using skills, roles, and project requirements.</p>
-      {loading ? <p className="mt-6 text-sm text-slate-300">Loading matches...</p> : null}
-      {error ? <p className="mt-6 text-sm font-medium text-rose-300">{error}</p> : null}
-      <div className="mt-6 grid gap-4">
-        {matches.length === 0 && !loading ? <div className="rounded-2xl border border-dashed border-white/10 bg-slate-950/30 p-4 text-sm text-slate-300">No matched projects found yet.</div> : null}
-        {matches.map((project) => (
-          <article key={project._id} className="rounded-[1.5rem] border border-white/10 bg-slate-950/30 p-5">
-            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">{project.userId?.name || 'Unknown owner'}</p>
-                <h3 className="mt-2 text-xl font-semibold text-white">{project.title}</h3>
-                <p className="mt-3 text-sm leading-6 text-slate-300">{project.description}</p>
+    <section>
+      <div className="cb-feed-head">
+        <div>
+          <h2 className="cb-title">Makers Directory</h2>
+          <p className="cb-sub">{matches.length} matched opportunities from backend</p>
+        </div>
+        <input className="cb-search" placeholder="🔍  Search by name, skill, university..." />
+      </div>
+
+      <div className="cb-chip-row">
+        <span className="cb-chip active">All</span>
+        <span className="cb-chip">💻 Developer</span>
+        <span className="cb-chip">🤖 ML / Data</span>
+        <span className="cb-chip">🎨 Design</span>
+        <span className="cb-chip">📋 Product</span>
+      </div>
+
+      {loading ? <p className="cb-sub">Loading makers...</p> : null}
+      {error ? <p className="cb-sub" style={{ color: '#d64c58' }}>{error}</p> : null}
+
+      <div className="cb-grid three">
+        {!loading && matches.length === 0 ? (
+          <article className="cb-card">No matches found yet. Complete your profile skills and check again.</article>
+        ) : null}
+
+        {matches.map((maker) => (
+          <article key={maker._id} className="cb-card">
+            <div className="cb-maker-top">
+              <div className="cb-profile-user">
+                <div className="cb-avatar">{(maker.userId?.name || maker.title || 'MK').split(' ').slice(0, 2).map((v) => v[0]).join('')}</div>
+                <div>
+                  <h3>{maker.userId?.name || maker.title}</h3>
+                  <p>{maker.userId?.email || 'University'}</p>
+                </div>
               </div>
-              <div className="rounded-2xl bg-emerald-500/15 px-4 py-3 text-right">
-                <p className="text-xs uppercase tracking-[0.18em] text-emerald-200">Match</p>
-                <p className="mt-1 text-2xl font-bold text-emerald-100">{project.matchPercentage}%</p>
-              </div>
+              <span className="cb-green">★ {maker.matchPercentage || 0}%</span>
             </div>
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Matched skills</p>
-                <p className="mt-2 text-sm text-slate-200">{(project.matchedSkills || []).join(', ') || 'None'}</p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-xs uppercase tracking-[0.18em] text-slate-400">Matched roles</p>
-                <p className="mt-2 text-sm text-slate-200">{(project.matchedRoles || []).join(', ') || 'None'}</p>
-              </div>
+
+            <div className="cb-tags">
+              {(maker.matchedSkills || []).slice(0, 5).map((tag) => <span key={`${maker._id}-${tag}`} className="cb-tag">{tag}</span>)}
+            </div>
+
+            <div className="cb-card-foot">
+              <span>{maker.teamSize || 1} spots</span>
+              <span className="cb-green">✓ Available</span>
+            </div>
+
+            <div className="cb-maker-actions">
+              <button className="cb-mini-btn primary" type="button">+ Connect</button>
+              <button className="cb-mini-btn" type="button">💬 Message</button>
             </div>
           </article>
         ))}

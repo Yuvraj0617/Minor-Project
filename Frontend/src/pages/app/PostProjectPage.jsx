@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { toast } from 'react-toastify'
 import { createProject } from '../../services/authApi'
 import { useAuth } from '../../context/useAuth'
 
@@ -9,9 +10,7 @@ function splitCommaList(value) {
 
 export default function PostProjectPage() {
   const { token } = useAuth()
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState('')
-  const [form, setForm] = useState({
+  const initialForm = {
     title: '',
     type: '',
     description: '',
@@ -19,14 +18,13 @@ export default function PostProjectPage() {
     technologies: '',
     teamSize: 1,
     isurgent: false,
-  })
+  }
+  const [form, setForm] = useState(initialForm)
 
   async function handleSubmit(event) {
     event.preventDefault()
-    setMessage('')
-    setError('')
     try {
-      await createProject({
+      const response = await createProject({
         title: form.title,
         type: splitCommaList(form.type),
         description: form.description,
@@ -35,35 +33,74 @@ export default function PostProjectPage() {
         teamSize: Number(form.teamSize) || 1,
         isurgent: form.isurgent,
       }, token)
-      setMessage('Project posted successfully.')
+      const backendMessage = response?.message || 'Project posted successfully.'
+      toast.success(backendMessage)
+      setForm(initialForm)
     } catch (err) {
-      setError(err.message)
+      toast.error(err?.message || 'Unable to post project. Please try again.')
     }
   }
 
   return (
-    <section className="rounded-[2rem] border border-white/10 bg-white/6 p-6 shadow-2xl backdrop-blur">
-      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-300">Post Project</p>
-      <h2 className="mt-3 text-3xl font-bold text-white">Publish a recruitment-ready project</h2>
-      <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-300">Create a project with clear skills, roles, and technologies so matching works well.</p>
-      {message ? <p className="mt-6 text-sm font-medium text-emerald-300">{message}</p> : null}
-      {error ? <p className="mt-6 text-sm font-medium text-rose-300">{error}</p> : null}
-      <form className="mt-6 grid gap-4" onSubmit={handleSubmit}>
-        <input className="rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-3 text-sm outline-none ring-amber-400/40 focus:ring" placeholder="Project title" value={form.title} onChange={(e) => setForm((c) => ({ ...c, title: e.target.value }))} />
-        <textarea className="min-h-32 rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-3 text-sm outline-none ring-amber-400/40 focus:ring" placeholder="Describe the project idea" value={form.description} onChange={(e) => setForm((c) => ({ ...c, description: e.target.value }))} />
-        <div className="grid gap-4 md:grid-cols-2">
-          <input className="rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-3 text-sm outline-none ring-amber-400/40 focus:ring" placeholder="Roles needed" value={form.type} onChange={(e) => setForm((c) => ({ ...c, type: e.target.value }))} />
-          <input className="rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-3 text-sm outline-none ring-amber-400/40 focus:ring" placeholder="Required skills" value={form.requiredSkills} onChange={(e) => setForm((c) => ({ ...c, requiredSkills: e.target.value }))} />
+    <section>
+      <div className="cb-feed-head">
+        <div>
+          <h2 className="cb-title">Post a Project</h2>
+          <p className="cb-sub">Publish a collaboration-ready project for the CraftBridge community</p>
         </div>
-        <div className="grid gap-4 md:grid-cols-[1fr_180px_auto]">
-          <input className="rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-3 text-sm outline-none ring-amber-400/40 focus:ring" placeholder="Technologies" value={form.technologies} onChange={(e) => setForm((c) => ({ ...c, technologies: e.target.value }))} />
-          <input className="rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-3 text-sm outline-none ring-amber-400/40 focus:ring" min="1" placeholder="Team size" type="number" value={form.teamSize} onChange={(e) => setForm((c) => ({ ...c, teamSize: e.target.value }))} />
-          <label className="flex items-center justify-center gap-3 rounded-2xl border border-white/10 bg-slate-950/35 px-4 py-3 text-sm text-slate-200">
+      </div>
+
+      <form className="cb-post-form" onSubmit={handleSubmit}>
+        <div className="cb-post-header">
+          <div>
+            <p className="cb-post-kicker">Project Details</p>
+            <h3>Make your project easy to read</h3>
+          </div>
+          <p className="cb-post-note">Fields below are shown with stronger contrast so nothing gets lost in the layout.</p>
+        </div>
+
+        <div className="field-grid two" style={{ marginTop: '0.7rem' }}>
+          <div className="field-group">
+            <label className="cb-form-label" htmlFor="title">Project title</label>
+            <input id="title" className="cb-form-input" placeholder="SmartCampus AI Navigator" value={form.title} onChange={(e) => setForm((c) => ({ ...c, title: e.target.value }))} />
+          </div>
+          <div className="field-group">
+            <label className="cb-form-label" htmlFor="type">Project type</label>
+            <input id="type" className="cb-form-input" placeholder="Final Year, Hackathon" value={form.type} onChange={(e) => setForm((c) => ({ ...c, type: e.target.value }))} />
+          </div>
+        </div>
+
+        <div className="field-group" style={{ marginTop: '0.7rem' }}>
+          <label className="cb-form-label" htmlFor="description">Description</label>
+          <textarea id="description" className="cb-form-input cb-form-textarea" placeholder="Explain problem, scope, and expected contribution." value={form.description} onChange={(e) => setForm((c) => ({ ...c, description: e.target.value }))} />
+        </div>
+
+        <div className="field-grid two" style={{ marginTop: '0.7rem' }}>
+          <div className="field-group">
+            <label className="cb-form-label" htmlFor="skills">Required skills</label>
+            <input id="skills" className="cb-form-input" placeholder="React Native, Python, BLE" value={form.requiredSkills} onChange={(e) => setForm((c) => ({ ...c, requiredSkills: e.target.value }))} />
+          </div>
+          <div className="field-group">
+            <label className="cb-form-label" htmlFor="tech">Technologies</label>
+            <input id="tech" className="cb-form-input" placeholder="TensorFlow, Node.js" value={form.technologies} onChange={(e) => setForm((c) => ({ ...c, technologies: e.target.value }))} />
+          </div>
+        </div>
+
+        <div className="field-grid two" style={{ marginTop: '0.7rem' }}>
+          <div className="field-group">
+            <label className="cb-form-label" htmlFor="size">Team size</label>
+            <input id="size" className="cb-form-input" min="1" placeholder="3" type="number" value={form.teamSize} onChange={(e) => setForm((c) => ({ ...c, teamSize: e.target.value }))} />
+          </div>
+          <label className="cb-form-check" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginTop: '1.55rem' }}>
             <input checked={form.isurgent} onChange={(e) => setForm((c) => ({ ...c, isurgent: e.target.checked }))} type="checkbox" />
-            Urgent
+            Mark as urgent hiring
           </label>
         </div>
-        <button className="rounded-2xl bg-linear-to-r from-orange-500 to-amber-500 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg" type="submit">Post project</button>
+
+        <div className="cb-maker-actions" style={{ marginTop: '0.9rem', maxWidth: '420px' }}>
+          <button className="cb-mini-btn primary" type="submit">+ Post Project</button>
+          <button className="cb-mini-btn" type="button">Save Draft</button>
+        </div>
       </form>
     </section>
   )
