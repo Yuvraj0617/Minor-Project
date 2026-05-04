@@ -10,7 +10,7 @@ const quickLinks = [
 export default function OverviewPage() {
   return (
     <section className="cb-hero">
-      <span className="cb-pill">● Now live across 80+ Indian colleges</span>
+      <span className="cb-pill">Now live across 80+ Indian colleges</span>
       <h1 className="cb-hero-title">
         Where Student <span className="cb-accent">Builders</span> Find Their Team
       </h1>
@@ -20,8 +20,8 @@ export default function OverviewPage() {
       </p>
 
       <div className="cb-hero-actions">
-        <Link className="cb-btn-primary" to="/app/projects">Browse Projects →</Link>
-        <Link className="cb-btn-secondary" to="/app/profile">Join Free</Link>
+        <Link className="cb-btn-primary" to="/app/projects">Browse Projects</Link>
+        <Link className="cb-btn-secondary" to="/app/post-project">Post a Project</Link>
       </div>
 
       <div className="cb-stats">

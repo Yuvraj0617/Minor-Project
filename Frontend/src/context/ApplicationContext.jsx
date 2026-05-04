@@ -1,4 +1,4 @@
-import { createContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuth } from './useAuth'
 
 const ApplicationContext = createContext(null)
@@ -35,31 +35,43 @@ export function ApplicationProvider({ children }) {
     }
   }, [appliedProjectIds, userId])
 
+  const markProjectApplied = useCallback((projectId) => {
+    if (!projectId) return
+    setAppliedProjectIds((current) => [...new Set([...current, projectId])])
+    setSyncVersion((current) => current + 1)
+  }, [])
+
+  const markApplicationDecision = useCallback(() => {
+    setSyncVersion((current) => current + 1)
+  }, [])
+
+  const resetApplicationState = useCallback(() => {
+    setAppliedProjectIds([])
+    setSyncVersion((current) => current + 1)
+  }, [])
+
+  const isProjectApplied = useCallback(
+    (projectId) => appliedProjectIds.includes(projectId),
+    [appliedProjectIds],
+  )
+
   const value = useMemo(() => {
-    function markProjectApplied(projectId) {
-      if (!projectId) return
-      setAppliedProjectIds((current) => [...new Set([...current, projectId])])
-      setSyncVersion((current) => current + 1)
-    }
-
-    function markApplicationDecision() {
-      setSyncVersion((current) => current + 1)
-    }
-
-    function resetApplicationState() {
-      setAppliedProjectIds([])
-      setSyncVersion((current) => current + 1)
-    }
-
     return {
       appliedProjectIds,
-      isProjectApplied: (projectId) => appliedProjectIds.includes(projectId),
+      isProjectApplied,
       markProjectApplied,
       markApplicationDecision,
       resetApplicationState,
       syncVersion,
     }
-  }, [appliedProjectIds, syncVersion])
+  }, [
+    appliedProjectIds,
+    isProjectApplied,
+    markApplicationDecision,
+    markProjectApplied,
+    resetApplicationState,
+    syncVersion,
+  ])
 
   return <ApplicationContext.Provider value={value}>{children}</ApplicationContext.Provider>
 }

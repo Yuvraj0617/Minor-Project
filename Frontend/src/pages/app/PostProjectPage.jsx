@@ -1,7 +1,7 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
-import { createProject } from '../../services/authApi'
-import { useAuth } from '../../context/useAuth'
+import { useProjects } from '../../context/useProjects'
 
 function splitCommaList(value) {
   if (!value.trim()) return []
@@ -9,7 +9,8 @@ function splitCommaList(value) {
 }
 
 export default function PostProjectPage() {
-  const { token } = useAuth()
+  const navigate = useNavigate()
+  const { createProject } = useProjects()
   const initialForm = {
     title: '',
     type: '',
@@ -20,9 +21,16 @@ export default function PostProjectPage() {
     isurgent: false,
   }
   const [form, setForm] = useState(initialForm)
+  const [submitting, setSubmitting] = useState(false)
 
   async function handleSubmit(event) {
     event.preventDefault()
+    if (!form.title.trim() || !form.description.trim()) {
+      toast.error('Please add a title and description before posting.')
+      return
+    }
+
+    setSubmitting(true)
     try {
       const response = await createProject({
         title: form.title,
@@ -32,12 +40,15 @@ export default function PostProjectPage() {
         technologies: splitCommaList(form.technologies),
         teamSize: Number(form.teamSize) || 1,
         isurgent: form.isurgent,
-      }, token)
+      })
       const backendMessage = response?.message || 'Project posted successfully.'
       toast.success(backendMessage)
       setForm(initialForm)
+      navigate('/app/projects')
     } catch (err) {
       toast.error(err?.message || 'Unable to post project. Please try again.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -98,8 +109,10 @@ export default function PostProjectPage() {
         </div>
 
         <div className="cb-maker-actions" style={{ marginTop: '0.9rem', maxWidth: '420px' }}>
-          <button className="cb-mini-btn primary" type="submit">+ Post Project</button>
-          <button className="cb-mini-btn" type="button">Save Draft</button>
+          <button className="cb-mini-btn primary" disabled={submitting} type="submit">
+            {submitting ? 'Posting...' : '+ Post Project'}
+          </button>
+          <button className="cb-mini-btn" onClick={() => setForm(initialForm)} type="button">Clear</button>
         </div>
       </form>
     </section>

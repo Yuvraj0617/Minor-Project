@@ -183,19 +183,24 @@ const getMatchedProjects = async (req, res) => {
     const projects = await Project.find({ userId: { $ne: req.user._id } })
       .populate("userId", "name email");
 
-    const matchedProjects = projects
-      .map((project) => {
+    const matchedProjects = await Promise.all(projects
+      .map(async (project) => {
         const match = calculateMatchBreakdown(profile, project);
+        const ownerProfile = await UserInfo.findOne({ UserId: project.userId._id })
+          .select("Institution Bio Role Skills Github LinkedIn");
 
         return {
           ...project.toObject(),
+          ownerProfile,
           matchScore: match.score,
           matchPercentage: match.matchPercentage,
           matchedSkills: match.matchedSkills,
           matchedRoles: match.matchedRoles,
           matchBreakdown: match.breakdown
         };
-      })
+      }));
+
+    const rankedMatchedProjects = matchedProjects
       .filter((project) => project.matchScore > 0)
       .sort((a, b) => {
         if (b.matchScore !== a.matchScore) {
@@ -206,8 +211,8 @@ const getMatchedProjects = async (req, res) => {
       });
 
     res.status(200).json({
-      total: matchedProjects.length,
-      data: matchedProjects
+      total: rankedMatchedProjects.length,
+      data: rankedMatchedProjects
     });
   } catch (error) {
     console.error(error);

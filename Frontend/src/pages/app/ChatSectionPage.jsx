@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createConversation, getChatToken, getMyChats } from '../../services/authApi'
 import { useAuth } from '../../context/useAuth'
 
@@ -11,7 +11,9 @@ export default function ChatSectionPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
-  async function loadChatData() {
+  const loadChatData = useCallback(async () => {
+    setLoading(true)
+    setError('')
     try {
       const [tokenResponse, chatsResponse] = await Promise.all([getChatToken(token), getMyChats(token)])
       setChatToken(tokenResponse)
@@ -21,11 +23,11 @@ export default function ChatSectionPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [token])
 
   useEffect(() => {
     loadChatData()
-  }, [token])
+  }, [loadChatData])
 
   async function handleCreateConversation(event) {
     event.preventDefault()
@@ -54,7 +56,7 @@ export default function ChatSectionPage() {
       {message ? <p className="cb-sub" style={{ color: '#1f8f46' }}>{message}</p> : null}
       {error ? <p className="cb-sub" style={{ color: '#d64c58' }}>{error}</p> : null}
 
-      <div className="cb-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
+      <div className="cb-grid two">
         <article className="cb-card">
           <h3>Chat Credentials</h3>
           <div className="cb-application">

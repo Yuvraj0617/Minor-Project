@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   acceptApplicant,
@@ -84,7 +84,7 @@ export default function DashboardPage() {
     setProjects(Array.isArray(response) ? response : response.data || [])
   }
 
-  async function refreshDashboard() {
+  const refreshDashboard = useCallback(async () => {
     try {
       setLoading(true)
       setErrorMessage('')
@@ -126,11 +126,11 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [saveProfileInfo, token])
 
   useEffect(() => {
     refreshDashboard()
-  }, [])
+  }, [refreshDashboard])
 
   async function handleProfileSubmit(event) {
     event.preventDefault()

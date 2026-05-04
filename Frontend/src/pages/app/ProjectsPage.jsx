@@ -1,17 +1,16 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import {
   acceptApplicant,
   applyToProject,
-  deleteProject,
   getApplicants,
   getMatchedUsersForProject,
-  getProjects,
   rejectApplicant,
-  updateProject,
 } from '../../services/authApi'
 import { useAuth } from '../../context/useAuth'
 import { useApplications } from '../../context/useApplications'
+import { useProjects } from '../../context/useProjects'
 
 function splitCommaList(value) {
   if (!String(value || '').trim()) return []
@@ -23,14 +22,25 @@ function joinCommaList(values) {
 }
 
 export default function ProjectsPage() {
+  const navigate = useNavigate()
   const { token, user } = useAuth()
+  const {
+    projects,
+    myProjects,
+    filters,
+    loading,
+    error,
+    setFilters,
+    resetFilters,
+    loadProjects,
+    updateProject,
+    deleteProject,
+  } = useProjects()
   const {
     isProjectApplied,
     markProjectApplied,
     markApplicationDecision,
   } = useApplications()
-  const [projects, setProjects] = useState([])
-  const [filters, setFilters] = useState({ skill: '', technology: '', type: '' })
   const [applicantsByProject, setApplicantsByProject] = useState({})
   const [matchesByProject, setMatchesByProject] = useState({})
   const [busyProjectIds, setBusyProjectIds] = useState([])
@@ -48,35 +58,30 @@ export default function ProjectsPage() {
     isurgent: false,
   })
 
-  const myProjects = useMemo(
-    () => projects.filter((project) => project.userId?._id === user?._id),
-    [projects, user?._id],
-  )
-
-  async function loadProjects(currentFilters = filters) {
-    const response = await getProjects(currentFilters, token)
-    setProjects(Array.isArray(response) ? response : response.data || [])
-  }
-
-  useEffect(() => {
-    async function initialLoad() {
-      try {
-        const response = await getProjects({}, token)
-        setProjects(Array.isArray(response) ? response : response.data || [])
-      } catch (err) {
-        toast.error(err?.message || 'Unable to load projects.')
-      }
-    }
-
-    initialLoad()
-  }, [token])
-
   async function handleFilterSubmit(event) {
     event.preventDefault()
     try {
       await loadProjects(filters)
     } catch (err) {
       toast.error(err?.message || 'Unable to apply filters.')
+    }
+  }
+
+  async function handleTypeFilter(type) {
+    const nextFilters = { ...filters, type }
+    setFilters(nextFilters)
+    try {
+      await loadProjects(nextFilters)
+    } catch (err) {
+      toast.error(err?.message || 'Unable to apply filters.')
+    }
+  }
+
+  async function handleResetFilters() {
+    try {
+      await resetFilters()
+    } catch (err) {
+      toast.error(err?.message || 'Unable to reset filters.')
     }
   }
 
@@ -167,9 +172,8 @@ export default function ProjectsPage() {
         technologies: splitCommaList(projectForm.technologies),
         teamSize: Number(projectForm.teamSize) || 1,
         isurgent: projectForm.isurgent,
-      }, token)
+      }, filters)
       toast.success(response?.message || 'Project updated successfully.')
-      await loadProjects(filters)
       setEditingProjectId(null)
     } catch (err) {
       toast.error(err?.message || 'Unable to update project.')
@@ -184,9 +188,8 @@ export default function ProjectsPage() {
 
     setDeletingProjectIds((current) => [...new Set([...current, projectId])])
     try {
-      const response = await deleteProject(projectId, token)
+      const response = await deleteProject(projectId)
       toast.success(response?.message || 'Project deleted successfully.')
-      setProjects((current) => current.filter((project) => project._id !== projectId))
       setApplicantsByProject((current) => {
         const next = { ...current }
         delete next[projectId]
@@ -213,18 +216,24 @@ export default function ProjectsPage() {
         <div>
           <h2 className="cb-title">Project Feed</h2>
           <p className="cb-sub">{projects.length} projects open for collaboration</p>
+          {loading ? <p className="cb-sub">Refreshing project feed...</p> : null}
+          {error ? <p className="cb-sub" style={{ color: '#d64c58' }}>{error}</p> : null}
         </div>
         <form className="cb-grid" onSubmit={handleFilterSubmit}>
-          <input className="cb-search" placeholder="🔍  Search by title, skill, or university..." value={filters.skill} onChange={(e) => setFilters((c) => ({ ...c, skill: e.target.value }))} />
+          <input
+            className="cb-search"
+            placeholder="Search by title, skill, or university..."
+            value={filters.skill}
+            onChange={(e) => setFilters((current) => ({ ...current, skill: e.target.value }))}
+          />
         </form>
       </div>
 
       <div className="cb-chip-row">
-        <button className="cb-chip active" onClick={handleFilterSubmit} type="button">All Projects</button>
-        <button className="cb-chip" onClick={() => setFilters((c) => ({ ...c, type: 'Final Year' }))} type="button">Final Year</button>
-        <button className="cb-chip" onClick={() => setFilters((c) => ({ ...c, type: 'Hackathon' }))} type="button">Hackathon</button>
-        <button className="cb-chip" onClick={() => setFilters((c) => ({ ...c, type: 'Research' }))} type="button">Research</button>
-        <button className="cb-chip" onClick={() => setFilters((c) => ({ ...c, type: 'Startup' }))} type="button">Startup</button>
+        <button className={`cb-chip ${!filters.type ? 'active' : ''}`} onClick={handleResetFilters} type="button">All Projects</button>
+        {['Final Year', 'Hackathon', 'Research', 'Startup'].map((type) => (
+          <button className={`cb-chip ${filters.type === type ? 'active' : ''}`} key={type} onClick={() => handleTypeFilter(type)} type="button">{type}</button>
+        ))}
       </div>
       <div className="cb-grid three">
         {projects.length === 0 ? <div className="cb-card">No projects found for selected filters.</div> : projects.map((project) => {
@@ -233,7 +242,7 @@ export default function ProjectsPage() {
             <article key={project._id} className="cb-card">
               <div className="cb-card-kicker">
                 <span>{(project.type || [])[0] || 'Project'}</span>
-                <span style={{ color: project.isurgent ? '#ef4f31' : '#808080' }}>{project.isurgent ? '● Urgent' : 'Open'}</span>
+                <span style={{ color: project.isurgent ? '#ef4f31' : '#808080' }}>{project.isurgent ? 'Urgent' : 'Open'}</span>
               </div>
               <h3>{project.title}</h3>
               <p>{project.description}</p>
@@ -245,7 +254,7 @@ export default function ProjectsPage() {
 
               <div className="cb-card-foot">
                 <span>{project.userId?.name || 'Campus Builder'}</span>
-                <span className="cb-green">● {project.teamSize || 1} spots left</span>
+                <span className="cb-green">{project.teamSize || 1} spots left</span>
               </div>
 
               {isMine ? (
@@ -267,34 +276,34 @@ export default function ProjectsPage() {
                   <div className="field-grid two">
                     <div className="field-group">
                       <label className="cb-form-label" htmlFor={`title-${project._id}`}>Title</label>
-                      <input id={`title-${project._id}`} className="cb-form-input" value={projectForm.title} onChange={(e) => setProjectForm((c) => ({ ...c, title: e.target.value }))} />
+                      <input id={`title-${project._id}`} className="cb-form-input" value={projectForm.title} onChange={(e) => setProjectForm((current) => ({ ...current, title: e.target.value }))} />
                     </div>
                     <div className="field-group">
                       <label className="cb-form-label" htmlFor={`type-${project._id}`}>Type</label>
-                      <input id={`type-${project._id}`} className="cb-form-input" value={projectForm.type} onChange={(e) => setProjectForm((c) => ({ ...c, type: e.target.value }))} />
+                      <input id={`type-${project._id}`} className="cb-form-input" value={projectForm.type} onChange={(e) => setProjectForm((current) => ({ ...current, type: e.target.value }))} />
                     </div>
                   </div>
                   <div className="field-group" style={{ marginTop: '0.6rem' }}>
                     <label className="cb-form-label" htmlFor={`desc-${project._id}`}>Description</label>
-                    <textarea id={`desc-${project._id}`} className="cb-form-input cb-form-textarea" value={projectForm.description} onChange={(e) => setProjectForm((c) => ({ ...c, description: e.target.value }))} />
+                    <textarea id={`desc-${project._id}`} className="cb-form-input cb-form-textarea" value={projectForm.description} onChange={(e) => setProjectForm((current) => ({ ...current, description: e.target.value }))} />
                   </div>
                   <div className="field-grid two" style={{ marginTop: '0.6rem' }}>
                     <div className="field-group">
                       <label className="cb-form-label" htmlFor={`skills-${project._id}`}>Required skills</label>
-                      <input id={`skills-${project._id}`} className="cb-form-input" value={projectForm.requiredSkills} onChange={(e) => setProjectForm((c) => ({ ...c, requiredSkills: e.target.value }))} />
+                      <input id={`skills-${project._id}`} className="cb-form-input" value={projectForm.requiredSkills} onChange={(e) => setProjectForm((current) => ({ ...current, requiredSkills: e.target.value }))} />
                     </div>
                     <div className="field-group">
                       <label className="cb-form-label" htmlFor={`tech-${project._id}`}>Technologies</label>
-                      <input id={`tech-${project._id}`} className="cb-form-input" value={projectForm.technologies} onChange={(e) => setProjectForm((c) => ({ ...c, technologies: e.target.value }))} />
+                      <input id={`tech-${project._id}`} className="cb-form-input" value={projectForm.technologies} onChange={(e) => setProjectForm((current) => ({ ...current, technologies: e.target.value }))} />
                     </div>
                   </div>
                   <div className="field-grid two" style={{ marginTop: '0.6rem' }}>
                     <div className="field-group">
                       <label className="cb-form-label" htmlFor={`size-${project._id}`}>Team size</label>
-                      <input id={`size-${project._id}`} className="cb-form-input" min="1" type="number" value={projectForm.teamSize} onChange={(e) => setProjectForm((c) => ({ ...c, teamSize: e.target.value }))} />
+                      <input id={`size-${project._id}`} className="cb-form-input" min="1" type="number" value={projectForm.teamSize} onChange={(e) => setProjectForm((current) => ({ ...current, teamSize: e.target.value }))} />
                     </div>
                     <label className="cb-form-check" style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginTop: '1.6rem' }}>
-                      <input checked={projectForm.isurgent} onChange={(e) => setProjectForm((c) => ({ ...c, isurgent: e.target.checked }))} type="checkbox" />
+                      <input checked={projectForm.isurgent} onChange={(e) => setProjectForm((current) => ({ ...current, isurgent: e.target.checked }))} type="checkbox" />
                       Mark as urgent
                     </label>
                   </div>
@@ -321,9 +330,9 @@ export default function ProjectsPage() {
                     onClick={() => handleApply(project._id)}
                     type="button"
                   >
-                    {isProjectApplied(project._id) ? '✓ Applied' : busyProjectIds.includes(project._id) ? 'Applying...' : '+ Apply'}
+                    {isProjectApplied(project._id) ? 'Applied' : busyProjectIds.includes(project._id) ? 'Applying...' : '+ Apply'}
                   </button>
-                  <button className="cb-mini-btn" type="button">Message</button>
+                  <button className="cb-mini-btn" onClick={() => navigate('/app/chat')} type="button">Message</button>
                 </div>
               ) : (
                 <div className="cb-maker-actions">
@@ -345,7 +354,7 @@ export default function ProjectsPage() {
                           onClick={() => handleDecision(project._id, application._id, 'accept')}
                           type="button"
                         >
-                          {processingApplicationIds.includes(application._id) ? 'Working...' : '✓ Accept'}
+                          {processingApplicationIds.includes(application._id) ? 'Working...' : 'Accept'}
                         </button>
                         <button
                           className="cb-mini-btn"
@@ -367,7 +376,7 @@ export default function ProjectsPage() {
                     <div key={candidate.user._id} className="cb-application">
                       <strong>{candidate.user.name}</strong>
                       <p className="cb-sub" style={{ marginTop: '0.2rem' }}>{candidate.user.email}</p>
-                      <span className="cb-green">● {candidate.matchPercentage}% match</span>
+                      <span className="cb-green">{candidate.matchPercentage}% match</span>
                     </div>
                   ))}
                 </div>

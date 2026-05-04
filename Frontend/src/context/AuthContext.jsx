@@ -1,4 +1,4 @@
-import { createContext, useMemo, useState } from 'react'
+import { createContext, useCallback, useMemo, useState } from 'react'
 import {
   clearAuthToken,
   getAuthToken,
@@ -16,32 +16,35 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => getAuthUser())
   const [userInfo, setUserInfoState] = useState(() => getUserInfo())
 
+  const login = useCallback((payload) => {
+    const nextToken = payload?.token || null
+    const nextUser = payload?.data || payload?.user || null
+
+    setToken(nextToken)
+    setUser(nextUser)
+
+    if (nextToken) {
+      setAuthToken(nextToken)
+    }
+
+    if (nextUser) {
+      setAuthUser(nextUser)
+    }
+  }, [])
+
+  const saveProfileInfo = useCallback((profile) => {
+    setUserInfoState(profile)
+    setUserInfo(profile)
+  }, [])
+
+  const logout = useCallback(() => {
+    setToken(null)
+    setUser(null)
+    setUserInfoState(null)
+    clearAuthToken()
+  }, [])
+
   const value = useMemo(() => {
-    const login = (payload) => {
-      setToken(payload.token || null)
-      setUser(payload.data || null)
-
-      if (payload.token) {
-        setAuthToken(payload.token)
-      }
-
-      if (payload.data) {
-        setAuthUser(payload.data)
-      }
-    }
-
-    const saveProfileInfo = (profile) => {
-      setUserInfoState(profile)
-      setUserInfo(profile)
-    }
-
-    const logout = () => {
-      setToken(null)
-      setUser(null)
-      setUserInfoState(null)
-      clearAuthToken()
-    }
-
     return {
       token,
       user,
@@ -51,7 +54,7 @@ export function AuthProvider({ children }) {
       saveProfileInfo,
       logout,
     }
-  }, [token, user, userInfo])
+  }, [login, logout, saveProfileInfo, token, user, userInfo])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

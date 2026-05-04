@@ -2,6 +2,7 @@ import Application from "../Model/Project_App.model.js";
 import Project from "../Model/Project.model.js";
 import Team from "../Model/Team.model.js";
 import Notification from "../Model/Notification.model.js";
+import Conversation from "../Model/Conversation.model.js";
 
 
 export const getApplicants = async (req, res) => {
@@ -56,6 +57,16 @@ export const acceptApplication = async (req, res) => {
       await Team.create({
         projectId: application.projectId,
         userId: application.userId
+      });
+    }
+
+    const existingConversation = await Conversation.findOne({
+      members: { $all: [project.userId, application.userId] }
+    });
+
+    if (!existingConversation) {
+      await Conversation.create({
+        members: [project.userId, application.userId]
       });
     }
 

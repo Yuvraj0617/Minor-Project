@@ -7,23 +7,26 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
 import { ApplicationProvider } from './context/ApplicationContext'
+import { ProjectProvider } from './context/ProjectContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
         <ApplicationProvider>
-          <App />
-          <ToastContainer
-            position="top-right"
-            autoClose={2600}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            pauseOnHover
-            draggable
-            theme="colored"
-          />
+          <ProjectProvider>
+            <App />
+            <ToastContainer
+              position="top-right"
+              autoClose={2600}
+              hideProgressBar={false}
+              newestOnTop
+              closeOnClick
+              pauseOnHover
+              draggable
+              theme="colored"
+            />
+          </ProjectProvider>
         </ApplicationProvider>
       </AuthProvider>
     </BrowserRouter>
